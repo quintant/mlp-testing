@@ -22,7 +22,7 @@ pipe = pipe.to("cuda")
 # Generate images
 for i in range(NUM_IMG//NUM_IMG_PER_PROMPT):
 
-    images:tuple[PIL.Image.Image] = pipe(
+    images = pipe(
         prompt=PROMPT, 
         neg_prompt=NEG_PROMPT, 
         return_dict=False, 
