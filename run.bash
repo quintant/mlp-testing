@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --gres=gpu:8
+#SBATCH --gres=gpu:1
 #SBATCH --output=SD.txt
 #SBATCH --nodes=1
 #SBATCH --mem=20G
@@ -16,7 +16,7 @@ export dataset_name="./data/"
 accelerate launch --multi_gpu --mixed_precision="fp16"  train_text_to_image.py --pretrained_model_name_or_path=$MODEL_NAME \
   --train_data_dir=$dataset_name \
   --resolution=128 --center_crop --random_flip \
-  --train_batch_size=8 \
+  --train_batch_size=1 \
   --gradient_accumulation_steps=1 \
   --gradient_checkpointing \
   --max_train_steps=15000 \
