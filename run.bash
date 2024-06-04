@@ -14,7 +14,7 @@ export MODEL_NAME="stabilityai/stable-diffusion-2-1"
 export dataset_name="./data/"
 
 accelerate launch --multi_gpu --mixed_precision="fp16"  train_text_to_image.py --pretrained_model_name_or_path=$MODEL_NAME \
-  --dataset_name=$dataset_name \
+  --train_data_dir=$dataset_name \
   --use_ema \
   --resolution=768 --center_crop --random_flip \
   --train_batch_size=16 \
