@@ -31,7 +31,7 @@ if __name__ == "__main__":
 
     meta_data = []
     for image in images:
-        meta_data.append('{' + f'"file_name": "{image}", "text": "{prompt}"' + '}\n')
+        meta_data.append('{' + f'"file_name": "{image.name}", "text": "{prompt}"' + '}\n')
 
     with open(path/meta_data_file, 'w') as f:
         for x in meta_data:
