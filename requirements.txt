@@ -4,3 +4,7 @@ torchaudio
 diffusers
 transformers
 accelerate
+datasets
+ftfy
+tensorboard
+Jinja2
