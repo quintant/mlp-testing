@@ -19,3 +19,20 @@ class ArtificialImagesDataset(Dataset):
         if self.transform:
             image = self.transform(image)
         return image
+    
+
+
+if __name__ == "__main__":
+    path = Path("data/train")
+    images = path.glob("*.png")
+    prompt = "Portrait of a person, photo, high quality, high resolution, vivid, sharp, clear, detailed, realistic"
+
+    meta_data_file = "metadata.jsonl"
+
+    meta_data = []
+    for image in images:
+        meta_data.append('{' + f'"file_name": "{image}", "text": "{prompt}"' + '}\n')
+
+    with open(path/meta_data_file, 'w') as f:
+        for x in meta_data:
+            f.write(x)

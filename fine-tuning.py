@@ -62,9 +62,12 @@ config = TrainingConfig()
 # dataset = load_dataset(config.dataset_name, split="train")
 
 #Read the dataset from Local
-text_file = 'data/text-dataset.txt'
-with open(text_file) as f:
-    prompts = f.readlines()
+# text_file = 'data/text-dataset.txt'
+# with open(text_file) as f:
+#     prompts = f.readlines()
+
+prompt = "Portrait of a person, photo, high quality, high resolution, vivid, sharp, clear, detailed, realistic"
+neg_prompt = "low quality, blurry, noisy, bad quality, worse quality, poor quality, low resolution, low res, pixelated, camera, black and white, old, vintage, painting, drawing"
 
 
 '''Load the model, a pipeline has two components, namely a model and a scheduler. The scheduler adds noise to the model
@@ -170,8 +173,7 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
                 #     repo.push_to_hub(commit_message=f"Epoch {epoch}", blocking=True)
                 # else:
                 pipeline.save_pretrained(config.output_dir)
-
-
+                
 def make_grid(images, rows, cols):
     w, h = images[0].size
     grid = Image.new('RGB', size=(cols*w, rows*h))
@@ -194,8 +196,4 @@ def evaluate(config, epoch, pipeline):
     test_dir = os.path.join(config.output_dir, "samples")
     os.makedirs(test_dir, exist_ok=True)
     image_grid.save(f"{test_dir}/{epoch:04d}.png")
-
-# noise_pred = model(noisy_image, timesteps).sample
-# loss = F.mse_loss(noise_pred, noise)
-
 train_loop(*args)
