@@ -17,7 +17,7 @@ accelerate launch --multi_gpu --mixed_precision="fp16"  train_text_to_image.py -
   --train_data_dir=$dataset_name \
   --use_ema \
   --resolution=768 --center_crop --random_flip \
-  --train_batch_size=16 \
+  --train_batch_size=8 \
   --gradient_accumulation_steps=4 \
   --gradient_checkpointing \
   --max_train_steps=15000 \
