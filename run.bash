@@ -1,6 +1,5 @@
 #!/bin/bash
-#SBATCH --nodelist=crannog02
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:8
 #SBATCH --output=SD.txt
 #SBATCH --nodes=1
 #SBATCH --mem=20G
@@ -17,7 +16,7 @@ export dataset_name="./data/"
 accelerate launch --multi_gpu --mixed_precision="fp16"  train_text_to_image.py --pretrained_model_name_or_path=$MODEL_NAME \
   --train_data_dir=$dataset_name \
   --use_ema \
-  --resolution=512 --center_crop --random_flip \
+  --resolution=256 --center_crop --random_flip \
   --train_batch_size=8 \
   --gradient_accumulation_steps=1 \
   --gradient_checkpointing \
