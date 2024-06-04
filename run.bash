@@ -10,6 +10,9 @@
 
 source /home/s2595230/mlp-testing/.venv/bin/activate
 
+rm /home/s2595230/.cache/huggingface/accelerate/default_config.yaml
+accelerate config default
+
 export MODEL_NAME="stabilityai/stable-diffusion-2-1"
 export dataset_name="./data/"
 
