@@ -33,5 +33,18 @@ for i in range(NUM_IMG//NUM_IMG_PER_PROMPT):
     
     for img in images:
         file_id = uuid.uuid4()
-        img.save(f"output/{file_id}.png")
-        
+        img.save(f"output/train/{file_id}.png")
+
+for i in range(NUM_IMG//NUM_IMG_PER_PROMPT):
+    images = pipe(
+        prompt=PROMPT, 
+        neg_prompt=NEG_PROMPT, 
+        return_dict=False, 
+        num_images_per_prompt=NUM_IMG_PER_PROMPT
+    )[0]
+
+    print(f"Generated {len(images)} images")
+
+    for img in images:
+        file_id = uuid.uuid4()
+        img.save(f"data/test/{file_id}.png")

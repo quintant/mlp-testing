@@ -1,6 +1,13 @@
 from PIL import Image
-from diffusers import DiffusionPipeline, StableDiffusionPipeline, UNet2DModel, DDPMScheduler, DDPMPipeline, \
-    get_cosine_schedule_with_warmup
+from diffusers import (
+    DiffusionPipeline, 
+    StableDiffusionPipeline, 
+    UNet2DModel, 
+    DDPMScheduler, 
+    DDPMPipeline,
+    get_cosine_schedule_with_warmup, 
+    DPMSolverMultistepScheduler
+)
 from dataclasses import dataclass
 import torch
 # from datasets import load_dataset
@@ -15,8 +22,12 @@ from huggingface_hub import HfFolder, Repository, whoami
 from tqdm.auto import tqdm
 from pathlib import Path
 # from datasets import load_dataset
+from torch.utils.data import DataLoader
 import os
 import torch
+import torch.nn.functional as F
+
+from dataset import ArtificialImagesDataset
 
 '''
 @Author: Varian Zhou
@@ -26,27 +37,28 @@ import torch
 #Training Configurations
 @dataclass
 class TrainingConfig:
-    image_size = 128  # the generated image resolution
+    image_size = 768  # the generated image resolution
     train_batch_size = 16
     eval_batch_size = 16  # how many images to sample during evaluation
     num_epochs = 50
     gradient_accumulation_steps = 1
-    learning_rate = 1e-4
+    learning_rate = 1e-5
     lr_warmup_steps = 500
     save_image_epochs = 10
     save_model_epochs = 30
     mixed_precision = "fp16"  # `no` for float32, `fp16` for automatic mixed precision
-    output_dir = "ddpm-butterflies-128"  # the model name locally and on the HF Hub
+    #Modify the output directory here.
+    output_dir = "data/test"  # the model name locally and on the HF Hub
 
     push_to_hub = True  # whether to upload the saved model to the HF Hub
-    hub_model_id = "<your-username>/<my-awesome-model>"  # the name of the repository to create on the HF Hub
+    hub_model_id = "stabilityai/stable-diffusion-2-1"  # the name of the repository to create on the HF Hub
     hub_private_repo = False
     overwrite_output_dir = True  # overwrite the old model when re-running the notebook
     seed = 0
+    dataset_name = "data/train"
 
 config = TrainingConfig()
 
-config.dataset_name = "huggan/smithsonian_butterflies_subset"
 # dataset = load_dataset(config.dataset_name, split="train")
 
 #Read the dataset from Local
@@ -54,52 +66,29 @@ text_file = 'data/text-dataset.txt'
 with open(text_file) as f:
     prompts = f.readlines()
 
-# #sample-input, this model takes around 1 hour to run
-# model_id = "runwayml/stable-diffusion-v1-5"
-#
-# #Create a pipeline
-# pipe = StableDiffusionPipeline.from_pretrained(
-#     "runwayml/stable-diffusion-v1-5",
-#     torch_dtype=torch.float16,
-#     use_safetensors=True,
-# )
 
 '''Load the model, a pipeline has two components, namely a model and a scheduler. The scheduler adds noise to the model
 in each step'''
-# model =
-#Here we use UNet2DModel as a sample model
-model = UNet2DModel(
-    sample_size=config.image_size,  # the target image resolution
-    in_channels=3,  # the number of input channels, 3 for RGB images
-    out_channels=3,  # the number of output channels
-    layers_per_block=2,  # how many ResNet layers to use per UNet block
-    block_out_channels=(128, 128, 256, 256, 512, 512),  # the number of output channes for each UNet block
-    down_block_types=(
-        "DownBlock2D",  # a regular ResNet downsampling block
-        "DownBlock2D",
-        "DownBlock2D",
-        "DownBlock2D",
-        "AttnDownBlock2D",  # a ResNet downsampling block with spatial self-attention
-        "DownBlock2D",
-    ),
-    up_block_types=(
-        "UpBlock2D",  # a regular ResNet upsampling block
-        "AttnUpBlock2D",  # a ResNet upsampling block with spatial self-attention
-        "UpBlock2D",
-        "UpBlock2D",
-        "UpBlock2D",
-        "UpBlock2D"
-      ),
-)
-noise_scheduler = DDPMScheduler(num_train_timesteps=1000)
 
+model = StableDiffusionPipeline.from_pretrained(
+    config.hub_model_id,
+    torch_dtype=torch.float16,
+)
+# noise_scheduler = DDPMScheduler(num_train_timesteps=1000)
+noise_scheduler = DPMSolverMultistepScheduler.from_config(model.scheduler.config)
+# noise = torch.randn(sample_image.shape)
+# timesteps = torch.LongTensor([50])
+# noisy_image = noise_scheduler.add_noise(sample_image, noise, timesteps)
 ''' A scheduler can be either a pretrained one or one to be trained.
 '''
 # The scheduler is needed to add noise to and denoise the model,
 # a scheduler defines how to iteratively add noise to an image
 # or how to update a sample based on a model’s output.
 
-train_dataloader = torch.utils.data.DataLoader(dataset, batch_size=config.train_batch_size, shuffle=True)
+dataset = ArtificialImagesDataset(image_dir=Path(config.dataset_name))
+
+train_dataloader = DataLoader(dataset, batch_size=config.train_batch_size, shuffle=True)
+
 '''Setting up the training'''
 optimizer = torch.optim.AdamW(model.parameters(), lr=config.learning_rate)
 lr_scheduler = get_cosine_schedule_with_warmup(
@@ -118,11 +107,11 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
         logging_dir=os.path.join(config.output_dir, "logs")
     )
     if accelerator.is_main_process:
-        if config.push_to_hub:
-            # repo_name = get_full_repo_name(Path(config.output_dir).name)
-            repo = Repository(config.output_dir, clone_from=repo_name)
-        elif config.output_dir is not None:
-            os.makedirs(config.output_dir, exist_ok=True)
+        # if config.push_to_hub:
+        #     repo_name = get_full_repo_name(Path(config.output_dir).name)
+        #     repo = Repository(config.output_dir, clone_from=repo_name)
+        # elif config.output_dir is not None:
+        os.makedirs(config.output_dir, exist_ok=True)
         accelerator.init_trackers("train_example")
 
     # Prepare everything
@@ -177,10 +166,10 @@ def train_loop(config, model, noise_scheduler, optimizer, train_dataloader, lr_s
                 evaluate(config, epoch, pipeline)
 
             if (epoch + 1) % config.save_model_epochs == 0 or epoch == config.num_epochs - 1:
-                if config.push_to_hub:
-                    repo.push_to_hub(commit_message=f"Epoch {epoch}", blocking=True)
-                else:
-                    pipeline.save_pretrained(config.output_dir)
+                # if config.push_to_hub:
+                #     repo.push_to_hub(commit_message=f"Epoch {epoch}", blocking=True)
+                # else:
+                pipeline.save_pretrained(config.output_dir)
 
 
 def make_grid(images, rows, cols):
@@ -206,6 +195,7 @@ def evaluate(config, epoch, pipeline):
     os.makedirs(test_dir, exist_ok=True)
     image_grid.save(f"{test_dir}/{epoch:04d}.png")
 
+# noise_pred = model(noisy_image, timesteps).sample
+# loss = F.mse_loss(noise_pred, noise)
 
-noise_pred = model(noisy_image, timesteps).sample
-loss = F.mse_loss(noise_pred, noise)
+train_loop(*args)

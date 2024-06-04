@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:10
 #SBATCH --output=SD.txt
 #SBATCH --nodes=1
 #SBATCH --mem=20G
@@ -10,4 +10,4 @@
 
 source /home/s2595230/mlp-testing/.venv/bin/activate
 
-python SD.py
+python fine-tuning.py
