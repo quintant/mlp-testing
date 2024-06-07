@@ -216,5 +216,23 @@ def main(args: argparse.Namespace):
 
 
     
-
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data_dir", type=str, required=True)
+    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--num_workers", type=int, default=4)
+    parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument("--beta1", type=float, default=0.9)
+    parser.add_argument("--beta2", type=float, default=0.999)
+    parser.add_argument("--weight_decay", type=float, default=0.0)
+    parser.add_argument("--adam_epsilon", type=float, default=1e-8)
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--resolution", type=int, default=256)
+    parser.add_argument("--center_crop", action="store_true")
+    parser.add_argument("--random_flip", action="store_true")
+    parser.add_argument("--compile", action="store_true")
+    parser.add_argument("--dataparallel", action="store_true")
+    parser.add_argument("--clip_grad_norm", type=float, default=-1)
+    args = parser.parse_args()
+    main(args)
 
