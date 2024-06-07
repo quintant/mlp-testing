@@ -64,6 +64,7 @@ def load_models(
 ) -> Tuple[
     AutoencoderKL, UNet2DConditionModel, CLIPTextModel, DDPMScheduler, CLIPTokenizer
 ]:
+    print("Loading models")
     vae = AutoencoderKL.from_pretrained(
         model_name, torch_dtype=torch.float16, subfolder="vae"
     )
@@ -76,6 +77,8 @@ def load_models(
     noise_scheduler = DDPMScheduler.from_pretrained(MODEL_NAME, subfolder="scheduler")
     tokenizer = CLIPTokenizer.from_pretrained(MODEL_NAME, subfolder="tokenizer")
 
+    print("Models loaded")
+
     if vae_device is not None:
         vae.to(vae_device)
     if unet_device is not None:
@@ -84,9 +87,11 @@ def load_models(
         text_encoder.to(text_encoder_device)
 
     if compile:
+        print("Compiling models")
         vae = torch.compile(vae)
         unet = torch.compile(unet)
         text_encoder = torch.compile(text_encoder)
+        print("Models compiled")
 
     vae.requires_grad_(False)
     text_encoder.requires_grad_(False)
@@ -117,6 +122,9 @@ def create_parallel_models(
     
     curr_device = 0
     for model in [vae, text_encoder]:
+        print(f"Creating parallel model for {model}")
+        print(f"Current device: {curr_device}")
+        print(f"Will use devices: {list(range(curr_device, curr_device + num_devices // 3))}")
         if model is not None:
             model.to(f"cuda:{curr_device}")
             if compile:
@@ -124,6 +132,9 @@ def create_parallel_models(
             model = torch.nn.DataParallel(model, device_ids=list(range(curr_device, curr_device + num_devices // 3)))
             curr_device += num_devices // 3
     if unet is not None:
+        print(f"Creating parallel model for {unet}")
+        print(f"Current device: {curr_device}")
+        print(f"Will use devices: {list(range(num_devices)[curr_device:])}")
         unet.to(f"cuda:{curr_device}")
         if compile:
             unet = torch.compile(unet)
@@ -132,6 +143,7 @@ def create_parallel_models(
     return vae, unet, text_encoder
 
 def get_dataset(args: argparse.Namespace) -> datasets.Dataset:
+    print("Getting dataset")
     data_transforms = transforms.Compose(
         [
             transforms.Resize(args.resolution, interpolation=transforms.InterpolationMode.BILINEAR),
@@ -142,7 +154,7 @@ def get_dataset(args: argparse.Namespace) -> datasets.Dataset:
         ]
     )
     dataset = ArtificialImagesDataset(
-        data_dir=args.data_dir,
+        data_dir=Path(args.data_dir),
         transform=data_transforms,
         model_name=MODEL_NAME,
     )
@@ -150,12 +162,15 @@ def get_dataset(args: argparse.Namespace) -> datasets.Dataset:
 
 
 def main(args: argparse.Namespace):
+    print("Starting training")
 
     vae, unet, text_encoder, scheduler, _ = load_models(MODEL_NAME)
     
     if args.dataparallel:
+        print("Creating parallel models")
         vae, unet, text_encoder = create_parallel_models(vae, unet, text_encoder, compile=args.compile)
 
+    print("Creating optimizer")
     optimizer = torch.optim.AdamW(
         unet.parameters(),
         lr=args.lr,
@@ -164,8 +179,10 @@ def main(args: argparse.Namespace):
         eps=args.adam_epsilon,
     )
 
+    print("Getting dataset")
     dataset = get_dataset(args)
 
+    print("Creating dataloader")
     dataloader = torch.utils.data.DataLoader(
         dataset,
         batch_size=args.batch_size,
@@ -178,6 +195,7 @@ def main(args: argparse.Namespace):
     # Gradient scaler
     scaler = torch.cuda.amp.GradScaler()
 
+    print("Starting training loop")
     for epoch in range(args.epochs):
         pb = tqdm(dataloader, desc=f"Epoch {epoch+1}/{args.epochs}")
         for i, (image, tokens) in enumerate(pb):
