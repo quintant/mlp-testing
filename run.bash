@@ -10,4 +10,4 @@
 
 source /home/s2595230/mlp-testing/.venv/bin/activate
 
-python3 custom_train.py --data_dir "./data/train" --batch_size 8 --num_workers 4 --lr 1e-5 --resolution 768 --center_crop --random_flip --compile --dataparallel
+python3 custom_train.py --data_dir "./data/train" --batch_size 8 --num_workers 4 --lr 1e-5 --resolution 768 --center_crop --random_flip --dataparallel
