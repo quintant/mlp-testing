@@ -208,8 +208,6 @@ def main(args: argparse.Namespace):
     )
 
     # Gradient scaler
-    scaler = torch.cuda.amp.GradScaler()
-
     print("Starting training loop")
     for epoch in range(args.epochs):
         pb = tqdm(dataloader, desc=f"Epoch {epoch+1}/{args.epochs}")
@@ -261,11 +259,10 @@ def main(args: argparse.Namespace):
 
             print("Backpropagating")
             optimizer.zero_grad()
-            scaler.scale(loss).backward()
-            if args.clip_grad_norm > 0:
-                torch.nn.utils.clip_grad_norm_(unet.parameters(), args.clip_grad_norm)
-            scaler.step(optimizer)
-            scaler.update()
+            loss.backward()
+            optimizer.step()
+
+            print("Updating progress bar")
 
 
 
