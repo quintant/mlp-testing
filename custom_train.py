@@ -215,35 +215,46 @@ def main(args: argparse.Namespace):
         pb = tqdm(dataloader, desc=f"Epoch {epoch+1}/{args.epochs}")
         for i, (image, tokens) in enumerate(pb):
             with torch.cuda.amp.autocast():
+                print("Sending data to devices")
                 image = image.to(vae_device)
                 tokens = tokens.to(text_encoder_device)
 
+                print("Encoding image")
                 latents = vae.encode(image).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
 
+                print("Generating noise")
                 noise = torch.randn_like(latents).to(vae_device)
 
                 bsz = image.shape[0]
 
+                print("Getting timesteps")
                 timesteps = torch.randint(0, scheduler.config.num_train_timesteps, (bsz,)).to(vae_device)
 
                 timesteps = timesteps.long()
 
+                print("Encoding text")
                 encoder_hidden_states = text_encoder(tokens)[0]
 
+                print("Getting target")
                 target = scheduler.get_velocity(latents, noise, timesteps)
 
+                print("Adding noise")
                 noisy_latents = scheduler.add_noise(latents, noise, timesteps)
 
+                print("Sending data to unet device")
                 noisy_latents = noisy_latents.to(unet_device)
                 encoder_hidden_states = encoder_hidden_states.to(unet_device)
                 timesteps = timesteps.to(unet_device)
                 target = target.to(unet_device)
 
+                print("Getting model prediction")
                 model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
 
+                print("Calculating loss")
                 loss = F.mse_loss(model_pred.float(), target.float())
 
+            print("Backpropagating")
             optimizer.zero_grad()
             scaler.scale(loss).backward()
             if args.clip_grad_norm > 0:
