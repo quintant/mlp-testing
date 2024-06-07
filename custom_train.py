@@ -129,14 +129,14 @@ def create_parallel_models(
     for model in [vae, text_encoder]:
         print(f"Creating parallel model for {model.__class__.__name__}")
         print(f"Current device: {curr_device}")
-        print(f"Will use devices: {list(range(curr_device, curr_device + num_devices // 3))}")
+        print(f"Will use devices: {list(range(curr_device, curr_device + 1))}")
         if model is not None:
             model.to(f"cuda:{curr_device}")
             main_devices.append(curr_device)
             if compile:
                 model = torch.compile(model)
-            model = torch.nn.DataParallel(model, device_ids=list(range(curr_device, curr_device + num_devices // 3)))
-            curr_device += num_devices // 3
+            model = torch.nn.DataParallel(model, device_ids=list(range(curr_device, curr_device + 1)))
+            curr_device += 1
     if unet is not None:
         print(f"Creating parallel model for {unet.__class__.__name__}")
         print(f"Current device: {curr_device}")

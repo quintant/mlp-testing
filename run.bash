@@ -3,7 +3,7 @@
 #SBATCH --output=SD.txt
 #SBATCH --nodes=1
 #SBATCH --mem=20G
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=16
 #SBATCH -p PGR-Standard
 #SBATCH --mail-type=END
 #SBATCH --mail-user=s2595230@ed.ac.uk
@@ -16,6 +16,6 @@ while true; do
   sleep 10
 done &
 
-python3 custom_train.py --data_dir "./data/train" --batch_size 8 --num_workers 4 --lr 1e-5 --resolution 512 --center_crop --random_flip --dataparallel
+python3 custom_train.py --data_dir "./data/train" --batch_size 12 --num_workers 16 --lr 1e-5 --resolution 512 --center_crop --random_flip --dataparallel
 
 kill %1s
