@@ -42,10 +42,11 @@ from diffusers.utils import (
 )
 from diffusers.utils.import_utils import is_xformers_available
 
-
+from dataset import ArtificialImagesDataset
 
 
 from typing import List, Tuple
+from contextlib import nullcontext
 
 MODEL_NAME = "stabilityai/stable-diffusion-2-1"
 
@@ -140,11 +141,17 @@ def get_dataset(args: argparse.Namespace) -> datasets.Dataset:
             transforms.Normalize([0.5], [0.5]),
         ]
     )
+    dataset = ArtificialImagesDataset(
+        data_dir=args.data_dir,
+        transform=data_transforms,
+        model_name=MODEL_NAME,
+    )
+    return dataset
 
 
 def main(args: argparse.Namespace):
 
-    vae, unet, text_encoder, scheduler, toenizer = load_models(MODEL_NAME)
+    vae, unet, text_encoder, scheduler, _ = load_models(MODEL_NAME)
     
     if args.dataparallel:
         vae, unet, text_encoder = create_parallel_models(vae, unet, text_encoder, compile=args.compile)
@@ -158,6 +165,55 @@ def main(args: argparse.Namespace):
     )
 
     dataset = get_dataset(args)
+
+    dataloader = torch.utils.data.DataLoader(
+        dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers,
+        pin_memory=True,
+        drop_last=True,
+    )
+
+    # Gradient scaler
+    scaler = torch.cuda.amp.GradScaler()
+
+    for epoch in range(args.epochs):
+        pb = tqdm(dataloader, desc=f"Epoch {epoch+1}/{args.epochs}")
+        for i, (image, tokens) in enumerate(pb):
+            with torch.cuda.amp.autocast():
+                image = image.to(vae.device)
+                tokens = tokens.to(text_encoder.device)
+
+                latents = vae.encode(image).latent_dist.sample()
+                latents = latents * vae.config.scaling_factor
+
+                noise = torch.randn_like(latents).to(vae.device)
+
+                bsz = image.shape[0]
+
+                timesteps = torch.randint(0, scheduler.config.num_train_timesteps, (bsz,)).to(latents.device)
+
+                timesteps = timesteps.long()
+
+                encoder_hidden_states = text_encoder(tokens)[0]
+
+                target = scheduler.get_velocity(latents, noise, timesteps)
+
+                noisy_latents = scheduler.add_noise(latents, noise, timesteps)
+
+                model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
+
+                loss = F.mse_loss(model_pred.float(), target.float())
+
+            optimizer.zero_grad()
+            scaler.scale(loss).backward()
+            if args.clip_grad_norm > 0:
+                torch.nn.utils.clip_grad_norm_(unet.parameters(), args.clip_grad_norm)
+            scaler.step(optimizer)
+            scaler.update()
+
+
 
     
 
