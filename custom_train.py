@@ -142,7 +142,6 @@ def create_parallel_models(
         print(f"Current device: {curr_device}")
         print(f"Will use devices: {list(range(num_devices)[curr_device:])}")
         unet.to(f"cuda:{curr_device}")
-        unet.enable_gradient_checkpointing()
         main_devices.append(curr_device)
         if compile:
             unet = torch.compile(unet)
