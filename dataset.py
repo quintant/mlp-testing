@@ -3,22 +3,40 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.io import read_image
 from pathlib import Path
-
+from transformers import CLIPTokenizer
 
 class ArtificialImagesDataset(Dataset):
-    def __init__(self, image_dir:Path, transform=None):
-        self.image_dir = image_dir
+    def __init__(self, data_dir:Path, transform=None, model_name:str="stabilityai/stable-diffusion-2-1"):
+        self.data_dir = data_dir
         self.transform = transform
-        self.images = list(image_dir.glob("*.png"))
+        self.tokenizer = CLIPTokenizer.from_pretrained(model_name, subfolder="tokenizer")
+        self.meta_data = dict()
+        meta_data_file = data_dir/"metadata.jsonl"
+        with open(meta_data_file, 'r') as f:
+            for line in f:
+                data = eval(line)
+                self.meta_data[data["file_name"]] = data["text"]
+        self.images = list(self.meta_data.keys())
 
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
-        image = read_image(str(self.images[idx]))
+        img_path = self.data_dir/self.images[idx]
+        image = read_image(img_path)
+        text = self.meta_data[self.images[idx]]
         if self.transform:
             image = self.transform(image)
-        return image
+            
+        tokens = self.tokenizer(
+            text,
+            max_length=self.tokenizer.model_max_length,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt"
+            ).input_ids
+        
+        return image, tokens
     
 
 
