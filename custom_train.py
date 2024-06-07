@@ -108,8 +108,12 @@ def create_parallel_models(
         compile: bool = False,
 
 ) -> Tuple[
-    AutoencoderKL, UNet2DConditionModel, CLIPTextModel
+    AutoencoderKL, UNet2DConditionModel, CLIPTextModel, int, int, int
 ]:
+    """
+    Create parallel models for training
+    returns: Tuple[AutoencoderKL, UNet2DConditionModel, CLIPTextModel, vae_device, text_encoder_device, unet_device]
+    """
     # Get number of devices
     num_devices = torch.cuda.device_count()
     print(f"Number of devices: {num_devices}")
@@ -121,12 +125,14 @@ def create_parallel_models(
         return vae, unet, text_encoder
     
     curr_device = 0
+    main_devices = []
     for model in [vae, text_encoder]:
         print(f"Creating parallel model for {model.__class__.__name__}")
         print(f"Current device: {curr_device}")
         print(f"Will use devices: {list(range(curr_device, curr_device + num_devices // 3))}")
         if model is not None:
             model.to(f"cuda:{curr_device}")
+            main_devices.append(curr_device)
             if compile:
                 model = torch.compile(model)
             model = torch.nn.DataParallel(model, device_ids=list(range(curr_device, curr_device + num_devices // 3)))
@@ -136,11 +142,12 @@ def create_parallel_models(
         print(f"Current device: {curr_device}")
         print(f"Will use devices: {list(range(num_devices)[curr_device:])}")
         unet.to(f"cuda:{curr_device}")
+        main_devices.append(curr_device)
         if compile:
             unet = torch.compile(unet)
         unet = torch.nn.DataParallel(unet, device_ids=list(range(num_devices))[curr_device:])
 
-    return vae, unet, text_encoder
+    return vae, unet, text_encoder, *main_devices
 
 def get_dataset(args: argparse.Namespace) -> datasets.Dataset:
     print("Getting dataset")
@@ -168,7 +175,15 @@ def main(args: argparse.Namespace):
     
     if args.dataparallel:
         print("Creating parallel models")
-        vae, unet, text_encoder = create_parallel_models(vae, unet, text_encoder, compile=args.compile)
+        vae, unet, text_encoder, vae_device, text_encoder_device, unet_device = create_parallel_models(vae, unet, text_encoder, compile=args.compile)
+
+        vae_device = f"cuda:{vae_device}"
+        text_encoder_device = f"cuda:{text_encoder_device}"
+        unet_device = f"cuda:{unet_device}"
+    else:
+        vae_device = "cuda" if torch.cuda.is_available() else "cpu"
+        text_encoder_device = "cuda" if torch.cuda.is_available() else "cpu"
+        unet_device = "cuda" if torch.cuda.is_available() else "cpu"
 
     print("Creating optimizer")
     optimizer = torch.optim.AdamW(
@@ -200,17 +215,17 @@ def main(args: argparse.Namespace):
         pb = tqdm(dataloader, desc=f"Epoch {epoch+1}/{args.epochs}")
         for i, (image, tokens) in enumerate(pb):
             with torch.cuda.amp.autocast():
-                image = image.to(vae.device)
-                tokens = tokens.to(text_encoder.device)
+                image = image.to(vae_device)
+                tokens = tokens.to(text_encoder_device)
 
                 latents = vae.encode(image).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
 
-                noise = torch.randn_like(latents).to(vae.device)
+                noise = torch.randn_like(latents).to(vae_device)
 
                 bsz = image.shape[0]
 
-                timesteps = torch.randint(0, scheduler.config.num_train_timesteps, (bsz,)).to(latents.device)
+                timesteps = torch.randint(0, scheduler.config.num_train_timesteps, (bsz,)).to(vae_device)
 
                 timesteps = timesteps.long()
 
@@ -219,6 +234,11 @@ def main(args: argparse.Namespace):
                 target = scheduler.get_velocity(latents, noise, timesteps)
 
                 noisy_latents = scheduler.add_noise(latents, noise, timesteps)
+
+                noisy_latents = noisy_latents.to(unet_device)
+                encoder_hidden_states = encoder_hidden_states.to(unet_device)
+                timesteps = timesteps.to(unet_device)
+                target = target.to(unet_device)
 
                 model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
 
