@@ -1,9 +1,9 @@
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
-from torchvision.io import read_image
 from pathlib import Path
 from transformers import CLIPTokenizer
+from PIL import Image
 
 class ArtificialImagesDataset(Dataset):
     def __init__(self, data_dir:Path, transform=None, model_name:str="stabilityai/stable-diffusion-2-1"):
@@ -23,7 +23,7 @@ class ArtificialImagesDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = self.data_dir/self.images[idx]
-        image = read_image(img_path)
+        image = Image.open(img_path)
         text = self.meta_data[self.images[idx]]
         if self.transform:
             image = self.transform(image)
