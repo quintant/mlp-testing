@@ -249,7 +249,12 @@ def main(args: argparse.Namespace):
                 target = target.to(unet_device)
 
                 print("Getting model prediction")
-                model_pred = unet(noisy_latents, timesteps, encoder_hidden_states).sample
+                model_pred = unet(
+                    noisy_latents, 
+                    timesteps, 
+                    encoder_hidden_states,
+                    return_dict=False
+                )[0]
 
                 print("Calculating loss")
                 loss = F.mse_loss(model_pred.float(), target.float())
