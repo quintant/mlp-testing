@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --gres=gpu:8
+#SBATCH --gres=gpu:4
 #SBATCH --output=SD.txt
 #SBATCH --nodes=1
 #SBATCH --mem=20G

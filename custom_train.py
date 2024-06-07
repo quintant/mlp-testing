@@ -122,7 +122,7 @@ def create_parallel_models(
     
     curr_device = 0
     for model in [vae, text_encoder]:
-        print(f"Creating parallel model for {model}")
+        print(f"Creating parallel model for {model.__class__.__name__}")
         print(f"Current device: {curr_device}")
         print(f"Will use devices: {list(range(curr_device, curr_device + num_devices // 3))}")
         if model is not None:
@@ -132,7 +132,7 @@ def create_parallel_models(
             model = torch.nn.DataParallel(model, device_ids=list(range(curr_device, curr_device + num_devices // 3)))
             curr_device += num_devices // 3
     if unet is not None:
-        print(f"Creating parallel model for {unet}")
+        print(f"Creating parallel model for {unet.__class__.__name__}")
         print(f"Current device: {curr_device}")
         print(f"Will use devices: {list(range(num_devices)[curr_device:])}")
         unet.to(f"cuda:{curr_device}")
