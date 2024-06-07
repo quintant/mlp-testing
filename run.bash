@@ -10,4 +10,12 @@
 
 source /home/s2595230/mlp-testing/.venv/bin/activate
 
-python3 custom_train.py --data_dir "./data/train" --batch_size 8 --num_workers 4 --lr 1e-5 --resolution 768 --center_crop --random_flip --dataparallel
+while true; do
+  nvidia-smi >> gpu_usage.log
+  top -b -n 1 | head -n 20 >> cpu_usage.log
+  sleep 10
+done &
+
+python3 custom_train.py --data_dir "./data/train" --batch_size 8 --num_workers 4 --lr 1e-5 --resolution 512 --center_crop --random_flip --dataparallel
+
+kill %1s
