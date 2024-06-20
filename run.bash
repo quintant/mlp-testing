@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --mem=20G
 #SBATCH --cpus-per-task=12
-#SBATCH -p PGR-Standard
+#SBATCH -p Teach-Standard
 #SBATCH --mail-type=END
 #SBATCH --mail-user=s2595230@ed.ac.uk
 
