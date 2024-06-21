@@ -211,9 +211,9 @@ def generate_training_data(
             text_encoder=text_encoder,
             scheduler=scheduler,
             tokenizer=tokenizer,
-            device=device,  # Use the same device as the model
             requires_safety_checker=False,
         )
+        pipe = pipe.to(device)
 
         os.makedirs(f"runs/{run_id}/data/{generation}", exist_ok=True)
         metadata = []

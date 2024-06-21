@@ -1,10 +1,9 @@
 #!/bin/bash
-#SBATCH --nodelist=landonia06
 #SBATCH --gres=gpu:a6000:2
 #SBATCH --output=SD.txt
 #SBATCH --nodes=1
 #SBATCH --mem=20G
-#SBATCH --cpus-per-task=12
+#SBATCH --cpus-per-task=8
 #SBATCH -p Teach-Standard
 #SBATCH --mail-type=END
 #SBATCH --mail-user=s2595230@ed.ac.uk
