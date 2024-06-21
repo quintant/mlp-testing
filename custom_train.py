@@ -6,6 +6,7 @@ import os
 import random
 import shutil
 from pathlib import Path
+from threading import Thread
 import uuid
 
 import accelerate
@@ -224,23 +225,30 @@ def generate_training_data(
         metadata = []
         for i in range(num_images // no_images_per_generation//2):
             # Do this call on separate threads
-            def generate_images():
-                return pipe(
+            def generate_images(results):
+                results[0] = pipe(
                     prompt=prompt,
                     return_dict=False,
                     num_images_per_prompt=no_images_per_generation,
                     resolution=resolution,
                 )[0]
-            def generate_images2():
-                return pipe2(
+            def generate_images2(results):
+                results[1] = pipe2(
                     prompt=prompt,
                     return_dict=False,
                     num_images_per_prompt=no_images_per_generation,
                     resolution=resolution,
                 )[0]
-            t1 = torch.jit.fork(generate_images)
-            t2 = torch.jit.fork(generate_images2)
-            images = torch.jit.wait(t1) + torch.jit.wait(t2)
+            
+            results = [None, None]
+            t1 = Thread(target=generate_images)
+            t2 = Thread(target=generate_images2)
+            t1.start()
+            t2.start()
+            t1.join()
+            t2.join()
+            images = results[0] + results[1]
+
 
             
             for img in images:
