@@ -252,7 +252,7 @@ def train(dataloader, vae, unet, text_encoder, scheduler, optimizer, args, vae_d
                 tokens = tokens.to(text_encoder_device)
 
                 print("Encoding image")
-                latents = vae.encode(image).latent_dist.sample()
+                latents = vae.module.encode(image).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
 
                 print("Generating noise")
