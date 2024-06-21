@@ -241,8 +241,8 @@ def generate_training_data(
                 )[0]
             
             results = [None, None]
-            t1 = Thread(target=generate_images)
-            t2 = Thread(target=generate_images2)
+            t1 = Thread(target=generate_images, args=(results,))
+            t2 = Thread(target=generate_images2, args=(results,))
             t1.start()
             t2.start()
             t1.join()
