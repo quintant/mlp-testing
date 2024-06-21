@@ -1,12 +1,10 @@
 import argparse
-from copy import deepcopy
 import logging
 import math
 import os
 import random
 import shutil
 from pathlib import Path
-from threading import Thread
 import uuid
 
 import accelerate
@@ -217,40 +215,17 @@ def generate_training_data(
             safety_checker=None,
             feature_extractor=None,
         )
-        pipe2 = deepcopy(pipe)
-        pipe = pipe.to(f"cuda:{0}")
-        pipe2 = pipe2.to(f"cuda:{1}")
+        pipe = pipe.to(device)
 
         os.makedirs(f"runs/{run_id}/data/{generation}", exist_ok=True)
         metadata = []
-        for i in range(num_images // no_images_per_generation//2):
-            # Do this call on separate threads
-            def generate_images(results):
-                results[0] = pipe(
-                    prompt=prompt,
-                    return_dict=False,
-                    num_images_per_prompt=no_images_per_generation,
-                    resolution=resolution,
-                )[0]
-            def generate_images2(results):
-                results[1] = pipe2(
-                    prompt=prompt,
-                    return_dict=False,
-                    num_images_per_prompt=no_images_per_generation,
-                    resolution=resolution,
-                )[0]
-            
-            results = [None, None]
-            t1 = Thread(target=generate_images, args=(results,))
-            t2 = Thread(target=generate_images2, args=(results,))
-            t1.start()
-            t2.start()
-            t1.join()
-            t2.join()
-            images = results[0] + results[1]
-
-
-            
+        for i in range(num_images // no_images_per_generation):
+            images = pipe(
+                prompt=prompt,
+                return_dict=False,
+                num_images_per_prompt=no_images_per_generation,
+                resolution=resolution,
+            )[0]
             for img in images:
                 file_id = uuid.uuid4()
                 img.save(f"runs/{run_id}/data/{generation}/{file_id}.png")
