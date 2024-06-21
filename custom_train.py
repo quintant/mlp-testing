@@ -1,4 +1,5 @@
 import argparse
+from copy import deepcopy
 import logging
 import math
 import os
@@ -215,17 +216,26 @@ def generate_training_data(
             safety_checker=None,
             feature_extractor=None,
         )
-        pipe = pipe.to(device)
+        pipe = pipe.to(f"cuda:{0}")
+        pipe2 = deepcopy(pipe)
+        pipe2 = pipe2.to(f"cuda:{1}")
 
         os.makedirs(f"runs/{run_id}/data/{generation}", exist_ok=True)
         metadata = []
-        for i in range(num_images // no_images_per_generation):
+        for i in range(num_images // no_images_per_generation//2):
             images = pipe(
                 prompt=prompt,
                 return_dict=False,
                 num_images_per_prompt=no_images_per_generation,
                 resolution=resolution,
             )[0]
+            images2 = pipe2(
+                prompt=prompt,
+                return_dict=False,
+                num_images_per_prompt=no_images_per_generation,
+                resolution=resolution,
+            )[0]
+            images = images + images2
             for img in images:
                 file_id = uuid.uuid4()
                 img.save(f"runs/{run_id}/data/{generation}/{file_id}.png")
