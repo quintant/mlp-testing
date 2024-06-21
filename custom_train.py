@@ -213,6 +213,7 @@ def generate_training_data(
             tokenizer=tokenizer,
             requires_safety_checker=False,
             safety_checker=None,
+            feature_extractor=None,
         )
         pipe = pipe.to(device)
 
