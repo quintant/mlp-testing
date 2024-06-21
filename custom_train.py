@@ -117,6 +117,7 @@ def create_parallel_models(
     returns: Tuple[AutoencoderKL, UNet2DConditionModel, CLIPTextModel, vae_device, text_encoder_device, unet_device]
     """
     if no_split:
+        print("Creating parallel models without splitting")
         vae_device = 0
         text_encoder_device = 0
         unet_device = 0
