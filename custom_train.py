@@ -238,8 +238,10 @@ def generate_training_data(
                     num_images_per_prompt=no_images_per_generation,
                     resolution=resolution,
                 )[0]
-            images = accelerate.utils.parallel.gather([generate_images, generate_images2])
-            
+            t1 = torch.jit.fork(generate_images)
+            t2 = torch.jit.fork(generate_images2)
+            images = torch.jit.wait(t1) + torch.jit.wait(t2)
+
             
             for img in images:
                 file_id = uuid.uuid4()
