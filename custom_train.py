@@ -212,6 +212,7 @@ def generate_training_data(
             scheduler=scheduler,
             tokenizer=tokenizer,
             requires_safety_checker=False,
+            safety_checker=None,
         )
         pipe = pipe.to(device)
 
