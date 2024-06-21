@@ -1,4 +1,5 @@
 import argparse
+from copy import deepcopy
 import logging
 import math
 import os
@@ -314,7 +315,7 @@ def main(args: argparse.Namespace):
     
     if args.dataparallel:
         print("Creating parallel models")
-        vae, unet, text_encoder, vae_device, text_encoder_device, unet_device = create_parallel_models(vae_o, unet_o, text_encoder_o, compile=args.compile, no_split=args.no_split)
+        vae, unet, text_encoder, vae_device, text_encoder_device, unet_device = create_parallel_models(deepcopy(vae_o), deepcopy(unet_o), deepcopy(text_encoder_o), compile=args.compile, no_split=args.no_split)
 
         vae_device = f"cuda:{vae_device}"
         text_encoder_device = f"cuda:{text_encoder_device}"
