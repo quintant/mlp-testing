@@ -127,7 +127,7 @@ def create_parallel_models(
             vae = torch.compile(vae)
             text_encoder = torch.compile(text_encoder)
             unet = torch.compile(unet)
-        vae = torch.nn.DataParallel(vae)
+        # vae = torch.nn.DataParallel(vae)
         text_encoder = torch.nn.DataParallel(text_encoder)
         unet = torch.nn.DataParallel(unet)
         return vae, unet, text_encoder, vae_device, text_encoder_device, unet_device
@@ -252,7 +252,7 @@ def train(dataloader, vae, unet, text_encoder, scheduler, optimizer, args, vae_d
                 tokens = tokens.to(text_encoder_device)
 
                 print("Encoding image")
-                latents = vae.module.encode(image).latent_dist.sample()
+                latents = vae.encode(image).latent_dist.sample()
                 latents = latents * vae.config.scaling_factor
 
                 print("Generating noise")
