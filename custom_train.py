@@ -206,7 +206,7 @@ def generate_training_data(
     with torch.no_grad():
         print("Generating training data")
         pipe = StableDiffusionPipeline(
-            vae=vae.module,
+            vae=vae,
             unet=unet.module,
             text_encoder=text_encoder.module,
             scheduler=scheduler,
