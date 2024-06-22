@@ -67,13 +67,13 @@ def load_models(
 ]:
     print("Loading models")
     vae = AutoencoderKL.from_pretrained(
-        model_name, torch_dtype=torch.float16, subfolder="vae"
+        model_name, torch_dtype=torch.bfloat16, subfolder="vae"
     )
     unet = UNet2DConditionModel.from_pretrained(
-        model_name, torch_dtype=torch.float16, subfolder="unet"
+        model_name, torch_dtype=torch.bfloat16, subfolder="unet"
     )
     text_encoder = CLIPTextModel.from_pretrained(
-        model_name, torch_dtype=torch.float16, subfolder="text_encoder"
+        model_name, torch_dtype=torch.bfloat16, subfolder="text_encoder"
     )
     noise_scheduler = DDPMScheduler.from_pretrained(MODEL_NAME, subfolder="scheduler")
     tokenizer = CLIPTokenizer.from_pretrained(MODEL_NAME, subfolder="tokenizer")
