@@ -186,7 +186,7 @@ def get_dataset(data_dir: str, args: argparse.Namespace) -> datasets.Dataset:
 
 def save_model(unet: UNet2DConditionModel, run_id: str, generation: int):
     print("Saving model")
-    unet.save_pretrained(f"runs/{run_id}/models/unet_{generation}")
+    unet.module.save_pretrained(f"runs/{run_id}/models/unet_{generation}")
 
 def generate_training_data(
         unet: UNet2DConditionModel,
