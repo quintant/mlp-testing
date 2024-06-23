@@ -8,4 +8,3 @@ datasets
 ftfy
 tensorboard
 Jinja2
-xformers
