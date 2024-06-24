@@ -8,32 +8,42 @@ def main(args):
 
     for i in range(args.num_generations):
         Popen(
-            [f'accelerate launch --multi_gpu --mixed_precision="fp16" python3 generate_training_data.py \
-                --run_id {args.run_id} \
-                --resolution {args.resolution} \
-                --num_images {args.num_images} \
-                --generation {generation} \
-                --images_per_generation {args.images_per_generation}'],
+            [
+                "accelerate",
+                "launch",
+                "--multi_gpu",
+                '--mixed_precision="fp16"',
+                "python3",
+                "generate_training_data.py",
+                "--run_id", f"{args.run_id}",
+                "--resolution", f"{args.resolution}",
+                "--num_images", f"{args.num_images}",
+                "--generation", f"{generation}",
+                "--images_per_generation", f"{args.images_per_generation}",
+            ],
             stdout=PIPE,
             stderr=PIPE,
         ).wait()
-        
+
         Popen(
-            [f"python3 train.py \
-                --run_id {args.run_id} \
-                --batch_size {args.batch_size} \
-                --num_workers {args.num_workers} \
-                --lr {args.lr} \
-                --beta1 {args.beta1} \
-                --beta2 {args.beta2} \
-                --weight_decay {args.weight_decay} \
-                --adam_epsilon {args.adam_epsilon} \
-                --epochs {args.epochs} \
-                --resolution {args.resolution} \
-                --center_crop \
-                --random_flip \
-                --no_split \
-                --generation {generation}"],
+            [
+                "python3"
+                "train.py"
+                "--run_id", f"{args.run_id}",
+                "--batch_size", f"{args.batch_size}",
+                "--num_workers", f"{args.num_workers}",
+                "--lr", f"{args.lr}",
+                "--beta1", f"{args.beta1}",
+                "--beta2", f"{args.beta2}",
+                "--weight_decay", f"{args.weight_decay}",
+                "--adam_epsilon", f"{args.adam_epsilon}",
+                "--epochs", f"{args.epochs}",
+                "--resolution", f"{args.resolution}",
+                "--center_crop", 
+                "--random_flip", 
+                "--no_split", 
+                "--generation", f"{generation}",
+            ],
             stdout=PIPE,
             stderr=PIPE,
         ).wait()
