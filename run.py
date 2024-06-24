@@ -12,7 +12,7 @@ def main(args):
                 "accelerate",
                 "launch",
                 "--multi_gpu",
-                '--mixed_precision="fp16"',
+                '--mixed_precision=fp16',
                 "python3",
                 "generate_training_data.py",
                 "--run_id", f"{args.run_id}",
