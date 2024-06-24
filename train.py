@@ -47,6 +47,7 @@ def train(
     for epoch in range(args.epochs):
         pb = tqdm(dataloader, desc=f"Epoch {epoch+1}/{args.epochs}")
         for i, (image, tokens) in enumerate(pb):
+            optimizer.zero_grad()
             with torch.cuda.amp.autocast():
                 # print("Sending data to devices")
                 image = image.to(vae_device)
@@ -92,7 +93,6 @@ def train(
                 loss = F.mse_loss(model_pred.float(), target.float())
 
             # print("Backpropagating")
-            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
