@@ -1,4 +1,4 @@
-import os
+from subprocess import Popen, PIPE
 from pathlib import Path
 import argparse
 
@@ -7,16 +7,19 @@ def main(args):
     generation = 0
 
     for i in range(args.num_generations):
-        os.system(
-            f'accelerate launch --multi_gpu --mixed_precision="fp16" python3 generate_training_data.py \
+        Popen(
+            [f'accelerate launch --multi_gpu --mixed_precision="fp16" python3 generate_training_data.py \
                 --run_id {args.run_id} \
                 --resolution {args.resolution} \
                 --num_images {args.num_images} \
                 --generation {generation} \
-                --images_per_generation {args.images_per_generation}'
-        )
-        os.system(
-            f"python3 train.py \
+                --images_per_generation {args.images_per_generation}'],
+            stdout=PIPE,
+            stderr=PIPE,
+        ).wait()
+        
+        Popen(
+            [f"python3 train.py \
                 --run_id {args.run_id} \
                 --batch_size {args.batch_size} \
                 --num_workers {args.num_workers} \
@@ -30,8 +33,10 @@ def main(args):
                 --center_crop \
                 --random_flip \
                 --no_split \
-                --generation {generation}"
-        )
+                --generation {generation}"],
+            stdout=PIPE,
+            stderr=PIPE,
+        ).wait()
 
 
 if __name__ == "__main__":
