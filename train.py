@@ -115,12 +115,13 @@ def load_models(
         MODEL_NAME, torch_dtype=torch.bfloat16, subfolder="text_encoder"
     )
     if generation == 0:
-        unet_moodel_name = MODEL_NAME
+        unet = UNet2DConditionModel.from_pretrained(
+            MODEL_NAME, torch_dtype=torch.bfloat16, subfolder="unet"
+        )
     else:
-        unet_moodel_name = load_path
-    unet = UNet2DConditionModel.from_pretrained(
-        unet_moodel_name, torch_dtype=torch.bfloat16, subfolder="unet"
-    )
+        unet = UNet2DConditionModel.from_pretrained(
+            load_path, torch_dtype=torch.bfloat16
+        )
     noise_scheduler = DDPMScheduler.from_pretrained(MODEL_NAME, subfolder="scheduler")
     tokenizer = CLIPTokenizer.from_pretrained(MODEL_NAME, subfolder="tokenizer")
 
