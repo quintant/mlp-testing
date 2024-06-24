@@ -26,7 +26,7 @@ def main(args):
         )
 
         for c in iter(lambda: proc.stdout.read(1), ""):
-            print(c, end="")
+            print(c, end="", flush=True)
 
         remaining_output = proc.communicate()
         print(remaining_output[0].strip())
@@ -56,7 +56,7 @@ def main(args):
         )
 
         for c in iter(lambda: proc.stdout.read(1), ""):
-            print(c, end="")
+            print(c, end="", flush=True)
 
         remaining_output = proc.communicate()
         print(remaining_output[0].strip())
