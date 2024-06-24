@@ -6,8 +6,8 @@ import argparse
 def main(args):
     generation = 0
 
-    for i in range(args.num_generations):
-        Popen(
+    for generation in range(args.num_generations):
+        proc = Popen(
             [
                 "accelerate",
                 "launch",
@@ -23,12 +23,20 @@ def main(args):
             ],
             stdout=PIPE,
             stderr=PIPE,
-        ).wait()
+            text=True,
+        )
+
+        while proc.poll() is None:
+            print(proc.stdout.readline().strip())
+
+        remaining_output = proc.communicate()
+        print(remaining_output[0].strip())
+        print(remaining_output[1].strip())
 
         Popen(
             [
-                "python3"
-                "train.py"
+                "python3",
+                "train.py",
                 "--run_id", f"{args.run_id}",
                 "--batch_size", f"{args.batch_size}",
                 "--num_workers", f"{args.num_workers}",
@@ -46,7 +54,16 @@ def main(args):
             ],
             stdout=PIPE,
             stderr=PIPE,
-        ).wait()
+            text=True,
+        )
+
+        while proc.poll() is None:
+            print(proc.stdout.readline().strip())
+
+        remaining_output = proc.communicate()
+        print(remaining_output[0].strip())
+        print(remaining_output[1].strip())
+
 
 
 if __name__ == "__main__":
