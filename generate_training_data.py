@@ -49,8 +49,8 @@ def generate_training_data(
         print("Generating training data")
         pipe = StableDiffusionPipeline(
             vae=vae,
-            unet=unet.module,
-            text_encoder=text_encoder.module,
+            unet=unet,
+            text_encoder=text_encoder,
             scheduler=scheduler,
             tokenizer=tokenizer,
             requires_safety_checker=False,
