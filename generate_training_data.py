@@ -71,7 +71,6 @@ def generate_training_data(
                 print(f"Generated {len(images)} images")
                 print(f"Saving images to {save_path}")
                 print(f"Saving metadata to {save_path / 'metadata.jsonl'}")
-                print(images)
                 for img in images:
                     file_id = uuid.uuid4()
                     img.save(save_path / f"{file_id}.png")
