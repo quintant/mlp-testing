@@ -1,4 +1,4 @@
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
 from pathlib import Path
 import argparse
 
@@ -21,20 +21,15 @@ def main(args):
                 "--images_per_generation", f"{args.images_per_generation}"
             ],
             stdout=PIPE,
-            stderr=PIPE,
+            stderr=STDOUT,
             text=True,
         )
 
-        while True:
-            output = proc.stdout.readline() + proc.stderr.readline()
-            if output == "" and proc.poll() is not None:
-                break
-            if output:
-                print(output.strip())
+        for c in iter(lambda: proc.stdout.read(1), ""):
+            print(c, end="")
 
         remaining_output = proc.communicate()
         print(remaining_output[0].strip())
-        print(remaining_output[1].strip())
 
         proc = Popen(
             [
@@ -56,20 +51,15 @@ def main(args):
                 "--generation", f"{generation}",
             ],
             stdout=PIPE,
-            stderr=PIPE,
+            stderr=STDOUT,
             text=True,
         )
 
-        while True:
-            output = proc.stdout.readline() + proc.stderr.readline()
-            if output == "" and proc.poll() is not None:
-                break
-            if output:
-                print(output.strip())
+        for c in iter(lambda: proc.stdout.read(1), ""):
+            print(c, end="")
 
         remaining_output = proc.communicate()
         print(remaining_output[0].strip())
-        print(remaining_output[1].strip())
 
 
 
