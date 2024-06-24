@@ -8,7 +8,7 @@ def main(args):
 
     for i in range(args.num_generations):
         os.system(
-            f'accelerate launch --multi_gpu --mixed_precision="fp16" python generate_training_data.py \
+            f'accelerate launch --multi_gpu --mixed_precision="fp16" python3 generate_training_data.py \
                 --run_id {args.run_id} \
                 --resolution {args.resolution} \
                 --num_images {args.num_images} \
@@ -16,7 +16,7 @@ def main(args):
                 --images_per_generation {args.images_per_generation}'
         )
         os.system(
-            f"python train.py \
+            f"python3 train.py \
                 --run_id {args.run_id} \
                 --batch_size {args.batch_size} \
                 --num_workers {args.num_workers} \
