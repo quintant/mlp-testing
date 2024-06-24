@@ -65,6 +65,8 @@ def main(args):
                 "--random_flip", 
                 "--no_split", 
                 "--generation", f"{generation}",
+                "--compile" if args.compile else "",
+                "--dataparallel" if args.dataparallel else "",
             ],
             stdout=PIPE,
             stderr=STDOUT,
