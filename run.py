@@ -26,8 +26,12 @@ def main(args):
             text=True,
         )
 
-        while proc.poll() is None:
-            print(proc.stdout.readline().strip())
+        while True:
+            output = proc.stdout.readline()
+            if output == "" and proc.poll() is not None:
+                break
+            if output:
+                print(output.strip())
 
         remaining_output = proc.communicate()
         print(remaining_output[0].strip())
@@ -57,8 +61,12 @@ def main(args):
             text=True,
         )
 
-        while proc.poll() is None:
-            print(proc.stdout.readline().strip())
+        while True:
+            output = proc.stdout.readline()
+            if output == "" and proc.poll() is not None:
+                break
+            if output:
+                print(output.strip())
 
         remaining_output = proc.communicate()
         print(remaining_output[0].strip())
