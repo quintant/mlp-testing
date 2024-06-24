@@ -56,7 +56,8 @@ def train(
                 # print("Encoding image")
                 # latents = vae.encode(image).latent_dist.sample()
                 latents = vae(image, "encode")
-                latents = latents * vae.config.scaling_factor
+                # latents = latents * vae.config.scaling_factor
+                latents = latents * vae.module.model.config.scaling_factor
 
                 # print("Generating noise")
                 noise = torch.randn_like(latents).to(vae_device)
@@ -173,7 +174,7 @@ def main(args):
 
     class CustomVAE(torch.nn.Module):
         def __init__(self, model):
-            super().__init__()
+            super(CustomVAE, self).__init__()
             self.model = model
 
         def forward(self, x, function):
