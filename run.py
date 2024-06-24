@@ -18,7 +18,7 @@ def main(args):
                 "--resolution", f"{args.resolution}",
                 "--num_images", f"{args.num_images}",
                 "--generation", f"{generation}",
-                "--images_per_generation", f"{args.images_per_generation}",
+                "--images_per_generation", f"{args.images_per_generation}"
             ],
             stdout=PIPE,
             stderr=PIPE,
@@ -26,7 +26,7 @@ def main(args):
         )
 
         while True:
-            output = proc.stdout.readline()
+            output = proc.stdout.readline() + proc.stderr.readline()
             if output == "" and proc.poll() is not None:
                 break
             if output:
@@ -36,7 +36,7 @@ def main(args):
         print(remaining_output[0].strip())
         print(remaining_output[1].strip())
 
-        Popen(
+        proc = Popen(
             [
                 "python3",
                 "train.py",
@@ -61,7 +61,7 @@ def main(args):
         )
 
         while True:
-            output = proc.stdout.readline()
+            output = proc.stdout.readline() + proc.stderr.readline()
             if output == "" and proc.poll() is not None:
                 break
             if output:
