@@ -76,7 +76,7 @@ def generate_training_data(
                     img.save(save_path / f"{file_id}.png")
                     metadata.append(f"{{'file_name': '{file_id}.png', 'text': '{prompt[0]}'}}")
 
-    with open(save_path / "metadata.jsonl", "w") as f:
+    with open(save_path / f"metadata_{distributed_state.process_index}.jsonl", "w") as f:
         for x in metadata:
             f.write(x + "\n")
 

@@ -31,6 +31,22 @@ def main(args):
         remaining_output = proc.communicate()
         print(remaining_output[0].strip())
 
+        meta_data = []
+        # Get all partial metadata files
+        path = Path(f"runs/{args.run_id}/data/{generation}")
+        meta_files = list(path.glob("metadata_*.jsonl"))
+        for meta_file in meta_files:
+            with open(meta_file, "r") as f:
+                meta_data.extend(f.readlines())
+
+        with open(path / "metadata.jsonl", "w") as f:
+            for x in meta_data:
+                f.write(x)
+
+        # Remove all partial metadata files
+        for meta_file in meta_files:
+            meta_file.unlink()
+
         proc = Popen(
             [
                 "python3",
