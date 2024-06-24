@@ -125,6 +125,7 @@ def main(args: argparse.Namespace):
         resolution=args.resolution,
         prompt_text="image of hands, photo, high quality, high resolution, vivid, sharp, clear, detailed, realistic",
         no_images_per_generation=args.images_per_generation,
+        save_path=DATA_PATH,
     )
 
 

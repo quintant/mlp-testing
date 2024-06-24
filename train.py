@@ -192,7 +192,7 @@ def main(args):
     vae = vae.to(vae_device)
     text_encoder = text_encoder.to(text_encoder_device)
     unet = unet.to(unet_device)
-
+    unet.train()
     if args.compile:
         unet = unet.compile()
         vae = vae.compile()
