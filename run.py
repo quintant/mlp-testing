@@ -13,7 +13,6 @@ def main(args):
                 "launch",
                 "--multi_gpu",
                 '--mixed_precision=fp16',
-                "python3",
                 "generate_training_data.py",
                 "--run_id", f"{args.run_id}",
                 "--resolution", f"{args.resolution}",
