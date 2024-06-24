@@ -57,11 +57,11 @@ def generate_training_data(
             safety_checker=None,
             feature_extractor=None,
         )
-        pipe = pipe.to(distributed_state)
+        pipe = pipe.to(distributed_state.device)
 
         metadata = []
-        for i in range(num_images // no_images_per_generation):
-            with distributed_state.split_between_processes([prompt_text, prompt_text], apply_padding=True) as prompt:
+        for i in range(num_images // no_images_per_generation // distributed_state.num_processes ):
+            with distributed_state.split_between_processes([prompt_text], apply_padding=True) as prompt:
                 images = pipe(
                     prompt=prompt,
                     return_dict=False,
@@ -96,9 +96,9 @@ def main(args: argparse.Namespace):
     text_encoder_device = distributed_state
     unet_device = distributed_state
 
-    vae = vae.to(vae_device)
-    text_encoder = text_encoder.to(text_encoder_device)
-    unet = unet.to(unet_device)
+    vae = vae.to(vae_device.device)
+    text_encoder = text_encoder.to(text_encoder_device.device)
+    unet = unet.to(unet_device.device)
 
     vae.eval()
     text_encoder.eval()
