@@ -74,7 +74,7 @@ def generate_training_data(
                 for img in images:
                     file_id = uuid.uuid4()
                     img.save(save_path / f"{file_id}.png")
-                    metadata.append(f"{{'file_name': '{file_id}.png', 'text': '{prompt}'}}")
+                    metadata.append(f"{{'file_name': '{file_id}.png', 'text': '{prompt[0]}'}}")
 
     with open(save_path / "metadata.jsonl", "w") as f:
         for x in metadata:
