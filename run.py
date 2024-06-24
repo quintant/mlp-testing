@@ -6,7 +6,7 @@ import argparse
 def main(args):
     generation = 0
 
-    for i in range(args.generations):
+    for i in range(args.num_generations):
         os.system(
             f'accelerate launch --multi_gpu --mixed_precision="fp16" python generate_training_data.py \
                 --run_id {args.run_id} \
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     parser.add_argument("--dataparallel", action="store_true")
     parser.add_argument("--clip_grad_norm", type=float, default=-1)
     parser.add_argument("--no_split", action="store_true")
-    parser.add_argument("--generations", type=int, required=True)
+    parser.add_argument("--num_generations", type=int, required=True)
     parser.add_argument("--num_images", type=int, default=10_000)
     parser.add_argument("--images_per_generation", type=int, default=16)
 
