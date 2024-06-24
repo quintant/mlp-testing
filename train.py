@@ -54,7 +54,8 @@ def train(
                 tokens = tokens.to(text_encoder_device)
 
                 # print("Encoding image")
-                latents = vae.encode(image).latent_dist.sample()
+                # latents = vae.encode(image).latent_dist.sample()
+                latents = vae(image, "encode")
                 latents = latents * vae.config.scaling_factor
 
                 # print("Generating noise")
@@ -170,7 +171,21 @@ def main(args):
 
     vae, unet, text_encoder, scheduler, tokenizer = load_models(LOAD_PATH, args.generation)
 
-    vae_device = torch.device("cuda:1")
+    class CustomVAE(torch.nn.Module):
+        def __init__(self, model):
+            super().__init__()
+            self.model = model
+
+        def forward(self, x, function):
+            if function == "encode":
+                return self.model.encode(x).latent_dist.sample()
+            elif function == "decode":
+                return self.model.decode(x)
+            
+    vae = CustomVAE(vae)
+            
+
+    vae_device = torch.device("cuda:0")
     text_encoder_device = torch.device("cuda:0")
     unet_device = torch.device("cuda:0")
 
@@ -186,6 +201,7 @@ def main(args):
     if args.dataparallel:
         unet = torch.nn.DataParallel(unet)
         text_encoder = torch.nn.DataParallel(text_encoder)
+        vae = torch.nn.DataParallel(vae)
 
     optimizer = torch.optim.Adam(
         unet.parameters(),
