@@ -57,7 +57,7 @@ def generate_training_data(
             safety_checker=None,
             feature_extractor=None,
         )
-        pipe = pipe.to(distributed_state.device)
+        pipe: StableDiffusionPipeline = pipe.to(distributed_state.device)
 
         metadata = []
         for i in range(num_images // no_images_per_generation // distributed_state.num_processes ):
@@ -68,10 +68,10 @@ def generate_training_data(
                     num_images_per_prompt=no_images_per_generation,
                     resolution=resolution,
                 )[0]
-            for img in images:
-                file_id = uuid.uuid4()
-                img.save(save_path / f"{file_id}.png")
-                metadata.append(f"{{'file_name': '{file_id}.png', 'text': '{prompt}'}}")
+                for img in images:
+                    file_id = uuid.uuid4()
+                    img.save(save_path / f"{file_id}.png")
+                    metadata.append(f"{{'file_name': '{file_id}.png', 'text': '{prompt}'}}")
 
     with open(save_path / "metadata.jsonl", "w") as f:
         for x in metadata:
