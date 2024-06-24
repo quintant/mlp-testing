@@ -61,7 +61,7 @@ def generate_training_data(
 
         metadata = []
         for i in range(num_images // no_images_per_generation):
-            with distributed_state.split_between_processes([prompt_text], apply_padding=True) as prompt:
+            with distributed_state.split_between_processes([prompt_text, prompt_text], apply_padding=True) as prompt:
                 images = pipe(
                     prompt=prompt,
                     return_dict=False,
@@ -120,6 +120,7 @@ def main(args: argparse.Namespace):
         distributed_state=distributed_state,
         resolution=args.resolution,
         prompt_text="image of hands, photo, high quality, high resolution, vivid, sharp, clear, detailed, realistic",
+        no_images_per_generation=args.images_per_generation,
     )
 
 
@@ -129,6 +130,7 @@ if __name__ == "__main__":
     parser.add_argument("--resolution", type=int, default=768)
     parser.add_argument("--num_images", type=int, default=10_000)
     parser.add_argument("--generation", type=int, required=True)
+    parser.add_argument("--images_per_generation", type=int, default=16)
 
     args = parser.parse_args()
     main(args)

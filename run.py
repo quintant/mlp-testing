@@ -8,11 +8,12 @@ def main(args):
 
     for i in range(args.generations):
         os.system(
-            f"accelerate launch --multi_gpu python generate_training_data.py \
+            f'accelerate launch --multi_gpu --mixed_precision="fp16" python generate_training_data.py \
                 --run_id {args.run_id} \
                 --resolution {args.resolution} \
                 --num_images {args.num_images} \
-                --generation {generation}"
+                --generation {generation} \
+                --images_per_generation {args.images_per_generation}'
         )
         os.system(
             f"python train.py \
@@ -53,6 +54,7 @@ if __name__ == "__main__":
     parser.add_argument("--no_split", action="store_true")
     parser.add_argument("--generations", type=int, required=True)
     parser.add_argument("--num_images", type=int, default=10_000)
+    parser.add_argument("--images_per_generation", type=int, default=16)
 
     args = parser.parse_args()
 

@@ -170,7 +170,7 @@ def main(args):
 
     vae, unet, text_encoder, scheduler, tokenizer = load_models(LOAD_PATH, args.generation)
 
-    vae_device = torch.device("cuda:0")
+    vae_device = torch.device("cuda:1")
     text_encoder_device = torch.device("cuda:0")
     unet_device = torch.device("cuda:0")
 
