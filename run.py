@@ -98,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument("--beta2", type=float, default=0.999)
     parser.add_argument("--weight_decay", type=float, default=0.0)
     parser.add_argument("--adam_epsilon", type=float, default=1e-8)
-    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--epochs", type=int, default=1)
     parser.add_argument("--resolution", type=int, default=256)
     parser.add_argument("--center_crop", action="store_true")
     parser.add_argument("--random_flip", action="store_true")
