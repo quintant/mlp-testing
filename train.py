@@ -115,6 +115,7 @@ def load_models(
         MODEL_NAME, torch_dtype=torch.bfloat16, subfolder="text_encoder"
     )
     if generation == 0:
+        print("Loading from pretrained")
         unet = UNet2DConditionModel.from_pretrained(
             MODEL_NAME, torch_dtype=torch.bfloat16, subfolder="unet"
         )
@@ -197,7 +198,8 @@ def main(args):
     vae = vae.to(vae_device)
     text_encoder = text_encoder.to(text_encoder_device)
     unet = unet.to(unet_device)
-    unet.train()
+    unet.requires_grad_(True)
+    unet = unet.train()
     if args.compile:
         unet = unet.compile()
         vae = vae.compile()
@@ -208,6 +210,9 @@ def main(args):
         text_encoder = torch.nn.DataParallel(text_encoder)
         vae = torch.nn.DataParallel(vae)
 
+    print("Models loaded")
+    for param in unet.parameters():
+        print(param.names)
     optimizer = torch.optim.Adam(
         unet.parameters(),
         lr=args.lr,
