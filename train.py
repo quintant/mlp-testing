@@ -211,9 +211,6 @@ def main(args):
         text_encoder = torch.nn.DataParallel(text_encoder)
         vae = torch.nn.DataParallel(vae)
 
-    print("Models loaded")
-    for param in unet.parameters():
-        print(param.names)
     optimizer = torch.optim.Adam(
         unet.parameters(),
         lr=args.lr,
