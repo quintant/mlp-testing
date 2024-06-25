@@ -51,8 +51,7 @@ def main(args):
 
         print(f"Training model for generation {generation}")
 
-        proc = Popen(
-            [
+        cmd = [
                 "python3",
                 "train.py",
                 "--run_id", f"{args.run_id}",
@@ -68,10 +67,14 @@ def main(args):
                 "--center_crop", 
                 "--random_flip", 
                 "--no_split", 
-                "--generation", f"{generation}",
-                "--compile" if args.compile else "",
-                "--dataparallel" if args.dataparallel else "",
-            ],
+                "--generation", f"{generation}"
+            ]
+        if args.compile:
+            cmd.append("--compile")
+        if args.dataparallel:
+            cmd.append("--dataparallel")
+        proc = Popen(
+            cmd,
             stdout=PIPE,
             stderr=STDOUT,
             text=True,
