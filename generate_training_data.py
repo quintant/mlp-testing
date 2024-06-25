@@ -129,6 +129,7 @@ def main(args: argparse.Namespace):
 
 
 if __name__ == "__main__":
+    torch.backends.cuda.matmul.allow_tf32 = True
     parser = argparse.ArgumentParser()
     parser.add_argument("--run_id", type=str, required=True)
     parser.add_argument("--resolution", type=int, default=768)
