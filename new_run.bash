@@ -18,6 +18,6 @@ while true; do
   sleep 10
 done &
 
-python3 run.py --run_id "hands_only" --batch_size 24 --num_workers 8 --lr 1e-5 --resolution 768 --center_crop --random_flip --dataparallel --no_split --num_generations 100 --num_images 32 --images_per_generation 16
+python3 run.py --run_id "hands_only" --batch_size 24 --num_workers 8 --lr 1e-5 --resolution 768 --center_crop --random_flip --dataparallel --no_split --num_generations 100 --num_images 10000 --images_per_generation 16
 
 kill %1s
