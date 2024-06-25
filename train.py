@@ -116,6 +116,7 @@ def load_models(
     )
     if generation == 0:
         print("Loading from pretrained")
+        print("Using", MODEL_NAME)
         unet = UNet2DConditionModel.from_pretrained(
             MODEL_NAME, torch_dtype=torch.bfloat16, subfolder="unet"
         )
@@ -201,9 +202,9 @@ def main(args):
     unet.requires_grad_(True)
     unet = unet.train()
     if args.compile:
-        unet = unet.compile()
-        vae = vae.compile()
-        text_encoder = text_encoder.compile()
+        unet.compile()
+        vae.compile()
+        text_encoder.compile()
 
     if args.dataparallel:
         unet = torch.nn.DataParallel(unet)

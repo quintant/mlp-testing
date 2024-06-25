@@ -7,6 +7,8 @@ def main(args):
     generation = 0
 
     for generation in range(args.num_generations):
+        print(f"Starting generation {generation}")
+        print(f"Generating training data for generation {generation}")
         proc = Popen(
             [
                 "accelerate",
@@ -46,6 +48,8 @@ def main(args):
         # Remove all partial metadata files
         for meta_file in meta_files:
             meta_file.unlink()
+
+        print(f"Training model for generation {generation}")
 
         proc = Popen(
             [
