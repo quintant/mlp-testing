@@ -242,7 +242,10 @@ def main(args):
     if args.dataparallel:
         unet = unet.module
 
-    unet.save_pretrained(SAVE_PATH)       
+    if args.dataparallel:
+        unet = unet.module
+
+    unet.save_pretrained(SAVE_PATH)      
     
 
 if __name__ == "__main__":
