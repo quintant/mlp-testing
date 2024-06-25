@@ -119,8 +119,10 @@ def load_models(
             MODEL_NAME, torch_dtype=torch.bfloat16, subfolder="unet"
         )
     else:
+        print("Loading from checkpoint")
+        print(str(load_path))
         unet = UNet2DConditionModel.from_pretrained(
-            load_path, torch_dtype=torch.bfloat16
+            str(load_path), torch_dtype=torch.bfloat16
         )
     noise_scheduler = DDPMScheduler.from_pretrained(MODEL_NAME, subfolder="scheduler")
     tokenizer = CLIPTokenizer.from_pretrained(MODEL_NAME, subfolder="tokenizer")
