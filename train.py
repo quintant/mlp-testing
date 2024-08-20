@@ -211,6 +211,7 @@ def main(args):
     unet.requires_grad_(True)
     unet = unet.train()
     if args.compile:
+        print("Compiling models")
         unet.compile()
         vae.compile()
         text_encoder.compile()
