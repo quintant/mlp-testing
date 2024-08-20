@@ -8,8 +8,8 @@
 #SBATCH --mail-type=END
 #SBATCH --mail-user=s2595230@ed.ac.uk
 
-source $HOME/mlp-testing/.venv/bin/activate
-rm $HONE/.cache/huggingface/accelerate/default_config.yaml
+source /home/ubuntu/mlp-testing/.venv/bin/activate
+rm /home/ubuntu/.cache/huggingface/accelerate/default_config.yaml
 accelerate config default
 
 while true; do
