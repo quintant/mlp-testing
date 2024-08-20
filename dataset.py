@@ -51,7 +51,8 @@ class RealImagesDataset(Dataset):
         return self.num_real_images
 
     def __getitem__(self, idx):
-        img_path = self.images[idx]
+        rand_idx = torch.randint(0, len(self.images), (1,)).item()
+        img_path = self.images[rand_idx]
         image = Image.open(img_path)
         if self.transform:
             image = self.transform(image)
