@@ -1,3 +1,4 @@
+import random
 import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
@@ -46,17 +47,26 @@ class RealImagesDataset(Dataset):
         self.num_real_images = num_real_images
         if len(self.images) < num_real_images:
             self.num_real_images = len(self.images)
+        text = "Portrait of a person, photo, high quality, high resolution, vivid, sharp, clear, detailed, realistic"
+        tokenizer = CLIPTokenizer.from_pretrained("stabilityai/stable-diffusion-2-1", subfolder="tokenizer")
+        self.tokens = tokenizer(
+            text,
+            max_length=tokenizer.model_max_length,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt"
+        ).input_ids
 
     def __len__(self):
         return self.num_real_images
 
     def __getitem__(self, idx):
-        rand_idx = torch.randint(0, len(self.images), (1,)).item()
+        rand_idx = random.randint(0, len(self.images)-1)
         img_path = self.images[rand_idx]
         image = Image.open(img_path)
         if self.transform:
             image = self.transform(image)
-        return image, 0
+        return image, self.tokens
     
 
 
