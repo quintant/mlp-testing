@@ -12,12 +12,5 @@ source /home/ubuntu/mlp-testing/.venv/bin/activate
 rm /home/ubuntu/.cache/huggingface/accelerate/default_config.yaml
 accelerate config default
 
-while true; do
-  nvidia-smi >> gpu_usage.log
-  top -b -n 1 | head -n 20 >> cpu_usage.log
-  sleep 10
-done &
 
 python3 run.py --run_id "hands_only" --batch_size 32 --num_workers 8 --lr 1e-5 --resolution 768 --center_crop --random_flip --dataparallel --no_split --num_generations 100 --num_images 250 --num_real_images 250 --images_per_generation 16 --epochs 2
-
-kill %1s
