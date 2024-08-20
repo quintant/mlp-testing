@@ -42,7 +42,7 @@ class RealImagesDataset(Dataset):
     def __init__(self, data_dir:Path, transform=None, num_real_images:int=16):
         self.data_dir = data_dir
         self.transform = transform
-        self.images = list(self.data_dir.glob("*.png"))
+        self.images = list(self.data_dir.glob("*.jpg"))
         self.num_real_images = num_real_images
         if len(self.images) < num_real_images:
             self.num_real_images = len(self.images)
