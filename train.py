@@ -109,23 +109,23 @@ def load_models(
 ]:
     
     vae = AutoencoderKL.from_pretrained(
-        MODEL_NAME, torch_dtype=torch.float16, subfolder="vae"
+        MODEL_NAME, torch_dtype=torch.bfloat16, subfolder="vae"
     )
     text_encoder = CLIPTextModel.from_pretrained(
-        MODEL_NAME, torch_dtype=torch.float16, subfolder="text_encoder"
+        MODEL_NAME, torch_dtype=torch.bfloat16, subfolder="text_encoder"
     )
     if generation == 0:
         print("Loading from pretrained")
         print("Using", MODEL_NAME)
         unet = UNet2DConditionModel.from_pretrained(
-            MODEL_NAME, torch_dtype=torch.float16, subfolder="unet"
+            MODEL_NAME, torch_dtype=torch.bfloat16, subfolder="unet"
         )
     else:
         print("Loading from checkpoint")
         lpth = './' + str(load_path)
         print(str(lpth))
         unet = UNet2DConditionModel.from_pretrained(
-            str(lpth), torch_dtype=torch.float16
+            str(lpth), torch_dtype=torch.bfloat16
         )
     noise_scheduler = DDPMScheduler.from_pretrained(MODEL_NAME, subfolder="scheduler")
     tokenizer = CLIPTokenizer.from_pretrained(MODEL_NAME, subfolder="tokenizer")
