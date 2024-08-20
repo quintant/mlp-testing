@@ -183,7 +183,7 @@ def main(args):
     MODEL_PATH.mkdir(parents=True, exist_ok=True)
     SAVE_PATH = MODEL_PATH / f"unet_{args.generation + 1}"
     LOAD_PATH = MODEL_PATH / f"unet_{args.generation}"
-    REAL_IMAGES_PATH = Path("real_images/")
+    REAL_IMAGES_PATH = Path("real_images/Hands")
 
     vae, unet, text_encoder, scheduler, tokenizer = load_models(LOAD_PATH, args.generation)
 
@@ -229,7 +229,7 @@ def main(args):
     )
 
     dataset = get_dataset(DATA_PATH, args)
-    real_dataset = get_dataset(DATA_PATH, args, real_images=True, num_real_images=args.num_real_images)
+    real_dataset = get_dataset(REAL_IMAGES_PATH, args, real_images=True, num_real_images=args.num_real_images)
     dataset = torch.utils.data.ConcatDataset([dataset, real_dataset])
     dataloader = torch.utils.data.DataLoader(
         dataset,
