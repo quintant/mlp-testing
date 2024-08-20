@@ -38,6 +38,25 @@ class ArtificialImagesDataset(Dataset):
         
         return image, tokens
     
+class RealImagesDataset(Dataset):
+    def __init__(self, data_dir:Path, transform=None, num_real_images:int=16):
+        self.data_dir = data_dir
+        self.transform = transform
+        self.images = list(self.data_dir.glob("*.png"))
+        self.num_real_images = num_real_images
+        if len(self.images) < num_real_images:
+            self.num_real_images = len(self.images)
+
+    def __len__(self):
+        return self.num_real_images
+
+    def __getitem__(self, idx):
+        img_path = self.images[idx]
+        image = Image.open(img_path)
+        if self.transform:
+            image = self.transform(image)
+        return image, 0
+    
 
 
 if __name__ == "__main__":

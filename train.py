@@ -24,7 +24,7 @@ from diffusers import (
     UNet2DConditionModel,
 )
 
-from dataset import ArtificialImagesDataset
+from dataset import ArtificialImagesDataset, RealImagesDataset
 from typing import List, Tuple
 
 MODEL_NAME = "stabilityai/stable-diffusion-2-1"
@@ -140,7 +140,7 @@ def load_models(
     return vae, unet, text_encoder, noise_scheduler, tokenizer
 
 
-def get_dataset(data_dir: str, args: argparse.Namespace) -> datasets.Dataset:
+def get_dataset(data_dir: str, args: argparse.Namespace, real_images=False, num_real_images=16) -> datasets.Dataset:
     print("Getting dataset")
     data_transforms = transforms.Compose(
         [
@@ -161,11 +161,19 @@ def get_dataset(data_dir: str, args: argparse.Namespace) -> datasets.Dataset:
             transforms.Normalize([0.5], [0.5]),
         ]
     )
-    dataset = ArtificialImagesDataset(
-        data_dir=Path(data_dir),
-        transform=data_transforms,
-        model_name=MODEL_NAME,
-    )
+
+    if real_images:
+        dataset = RealImagesDataset(
+            data_dir=Path(data_dir),
+            transform=data_transforms,
+            num_real_images=num_real_images,
+        )
+    else:
+        dataset = ArtificialImagesDataset(
+            data_dir=Path(data_dir),
+            transform=data_transforms,
+            model_name=MODEL_NAME,
+        )
     return dataset
 
 def main(args):
@@ -175,6 +183,7 @@ def main(args):
     MODEL_PATH.mkdir(parents=True, exist_ok=True)
     SAVE_PATH = MODEL_PATH / f"unet_{args.generation + 1}"
     LOAD_PATH = MODEL_PATH / f"unet_{args.generation}"
+    REAL_IMAGES_PATH = Path("real_images/")
 
     vae, unet, text_encoder, scheduler, tokenizer = load_models(LOAD_PATH, args.generation)
 
@@ -220,6 +229,8 @@ def main(args):
     )
 
     dataset = get_dataset(DATA_PATH, args)
+    real_dataset = get_dataset(DATA_PATH, args, real_images=True, num_real_images=args.num_real_images)
+    dataset = torch.utils.data.ConcatDataset([dataset, real_dataset])
     dataloader = torch.utils.data.DataLoader(
         dataset,
         batch_size=args.batch_size,
@@ -268,6 +279,7 @@ if __name__ == "__main__":
     parser.add_argument("--clip_grad_norm", type=float, default=-1)
     parser.add_argument("--no_split", action="store_true")
     parser.add_argument("--generation", type=int, required=True)
+    parser.add_argument("--num_real_images", type=int, default=16)
 
     args = parser.parse_args()
     main(args)

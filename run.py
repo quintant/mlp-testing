@@ -67,7 +67,8 @@ def main(args):
                 "--center_crop", 
                 "--random_flip", 
                 "--no_split", 
-                "--generation", f"{generation}"
+                "--generation", f"{generation}",
+                "--num_real_images", f"{args.num_real_images}",
             ]
         if args.compile:
             cmd.append("--compile")
@@ -109,6 +110,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_generations", type=int, required=True)
     parser.add_argument("--num_images", type=int, default=10_000)
     parser.add_argument("--images_per_generation", type=int, default=16)
+    parser.add_argument("--num_real_images", type=int, default=16)
 
     args = parser.parse_args()
 
