@@ -47,7 +47,7 @@ class RealImagesDataset(Dataset):
         self.num_real_images = num_real_images
         if len(self.images) < num_real_images:
             self.num_real_images = len(self.images)
-        text = "Portrait of a person, photo, high quality, high resolution, vivid, sharp, clear, detailed, realistic"
+        text = "image of hands, photo, high quality, high resolution, vivid, sharp, clear, detailed, realistic"
         tokenizer = CLIPTokenizer.from_pretrained("stabilityai/stable-diffusion-2-1", subfolder="tokenizer")
         self.tokens = tokenizer(
             text,
